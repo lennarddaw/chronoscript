@@ -1,5 +1,4 @@
-
-from lark import Transformer
+from lark import Transformer, Tree, Token
 
 class ChronoTransformer(Transformer):
     def TIME(self, token):
@@ -8,12 +7,28 @@ class ChronoTransformer(Transformer):
         multiplier = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400}[unit]
         return value * multiplier
 
-    def condition(self, items):
+    def simple_cond(self, items):
         return str(items[0])
+
+    def condition_arg(self, items):
+        return str(items[0])
+
+    def condition_args(self, items):
+        return [str(i) for i in items]
+
+    def func_call(self, items):
+        func_name = str(items[0])
+        args = items[1] if len(items) > 1 else []
+        # Rebuild the raw string version
+        arg_str = ", ".join(args)
+        return f"{func_name}({arg_str})"
+
+    def string(self, items):
+        return str(items[0])[1:-1]  # Strip quotes
 
     def action(self, items):
         name = str(items[0])
-        value = str(items[1])[1:-1] if len(items) > 1 else ""
+        value = items[1] if len(items) > 1 else ""
         return {"type": name, "value": value}
 
     def statement(self, items):

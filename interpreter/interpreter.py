@@ -2,7 +2,7 @@ import time
 import re
 from lark import Lark
 from interpreter.conditions import eval_condition
-from interpreter.transformer import ChronoTransformer  # <-- falls Transformer ausgelagert
+from interpreter.transformer import ChronoTransformer
 
 # Load grammar
 with open("interpreter/chrono_grammar.lark") as f:
@@ -20,8 +20,28 @@ def run_script(parsed_script):
         def task():
             if eval_condition(condition):
                 for act in actions:
-                    if isinstance(act, dict) and act.get("type") == "log":
-                        print(f"[log] {act.get('value', '')}")
+                    if not isinstance(act, dict):
+                        return
+                    typ = act.get("type")
+                    val = act.get("value", "")
+
+                    if typ == "log":
+                        print(f"[log] {val}")
+
+                    elif typ == "notify":
+                        print(f"[notify] {val.upper()} 🔔")
+
+                    elif typ == "save":
+                        with open("output.log", "a", encoding="utf-8") as f:
+                            f.write(f"[saved] {val}\n")
+                        print(f"[save] Written to output.log")
+
+                    elif typ == "exec":
+                        try:
+                            print("[exec] →", end=" ")
+                            exec(val)
+                        except Exception as e:
+                            print(f"[exec error] {e}")
 
         print(f"[start] Running every {interval}s...")
         task()

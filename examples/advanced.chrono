@@ -1,0 +1,6 @@
+loop every 10s if true {
+    log("Running...");
+    notify("Check complete");
+    save("Backup complete.");
+    exec("print('Inline Python executed!')");
+}

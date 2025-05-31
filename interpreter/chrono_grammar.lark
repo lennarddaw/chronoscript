@@ -2,7 +2,11 @@ start: statement+
 
 statement: "loop" "every" TIME "if" condition "{" action+ "}"
 
-condition: /[a-zA-Z_][a-zA-Z0-9_()]*/
+condition: CNAME "(" [condition_args] ")"     -> func_call
+         | CNAME                              -> simple_cond
+
+condition_args: condition_arg ("," condition_arg)*
+condition_arg: ESCAPED_STRING | NUMBER | CNAME
 action: CNAME "(" string? ")" ";"
 
 string: ESCAPED_STRING
@@ -11,6 +15,7 @@ TIME: /\d+[smhd]/
 
 %import common.WS
 %import common.CNAME
+%import common.NUMBER
 %import common.ESCAPED_STRING
 %import common.WS
 %ignore WS

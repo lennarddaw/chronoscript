@@ -1,0 +1,7 @@
+loop every 5s if hour_between(8, 18) {
+    log("We're inside working hours.");
+}
+
+loop every 10s if random_chance(0.5) {
+    notify("Random event triggered!");
+}
