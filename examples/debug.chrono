@@ -1,0 +1,3 @@
+loop every 5s if true {
+    log("✓ Interpreter funktioniert!");
+}
