@@ -12,7 +12,9 @@ class ChronoTransformer(Transformer):
         return str(items[0])
 
     def action(self, items):
-        return str(items[0]).strip()
+        name = str(items[0])
+        value = str(items[1])[1:-1] if len(items) > 1 else ""
+        return {"type": name, "value": value}
 
     def statement(self, items):
         return {

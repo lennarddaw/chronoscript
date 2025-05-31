@@ -1,0 +1,3 @@
+loop every 5s if is_weekend() {
+    log("It's the weekend!");
+}
