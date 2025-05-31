@@ -1,8 +1,8 @@
-start: statement+
+start: (statement | assign_stmt)+
 
 statement: "loop" "every" TIME "if" condition "{" action+ "}"
 
-?condition: bool_expr
+condition: /[^{}]+/  -> raw_condition
 
 ?bool_expr: bool_term
           | bool_expr "||" bool_term   -> or_expr
@@ -19,13 +19,19 @@ simple_cond: CNAME
 func_call: CNAME "(" [condition_args] ")"
 condition_args: condition_arg ("," condition_arg)*
 condition_arg: ESCAPED_STRING | NUMBER | CNAME
-action: CNAME "(" string? ")" ";"
+?action: call_action
+       | set_action
+
+call_action: CNAME "(" string? ")" ";"                  -> call
+set_action: "set" CNAME "=" value ";"                   -> set
+?value: ESCAPED_STRING | NUMBER | CNAME
+
+assign_stmt: "set" CNAME "=" value ";"
 
 string: ESCAPED_STRING
 
 TIME: /\d+[smhd]/
 
-%import common.WS
 %import common.CNAME
 %import common.NUMBER
 %import common.ESCAPED_STRING

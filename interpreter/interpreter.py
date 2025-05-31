@@ -1,5 +1,5 @@
 import time
-import re
+import threading
 from lark import Lark
 from interpreter.conditions import eval_condition
 from interpreter.transformer import ChronoTransformer
@@ -10,46 +10,58 @@ with open("interpreter/chrono_grammar.lark") as f:
 
 parser = Lark(grammar, start="start")
 
+# Global memory store
+memory = {}
+
 # Interpreter: Führt die Aktionen aus
 def run_script(parsed_script):
+    global memory
+
     for stmt in parsed_script:
+        if stmt.get("type") == "set":
+            memory[stmt["key"]] = stmt["value"]
+            print(f"[set] {stmt['key']} = {stmt['value']}")
+            continue
+
+        if stmt.get("type") != "loop":
+            continue
+
         interval = stmt["interval"]
         condition = stmt["condition"]
         actions = stmt["actions"]
 
-        def task():
-            if eval_condition(condition):
-                for act in actions:
-                    if not isinstance(act, dict):
-                        return
-                    typ = act.get("type")
-                    val = act.get("value", "")
+        print(f"[debug] Parsed loop: every {interval}s if {condition} → {actions}")
 
-                    if typ == "log":
-                        print(f"[log] {val}")
+        # Task-Logik mit eval_condition und Speicher
+        def make_task(interval, condition, actions):
+            def task():
+                print(f"[start] Running every {interval}s...")
+                while True:
+                    if eval_condition(condition, memory):
+                        for act in actions:
+                            typ = act.get("type")
+                            val = act.get("value", "")
 
-                    elif typ == "notify":
-                        print(f"[notify] {val.upper()} 🔔")
+                            if typ == "log":
+                                # Dynamische Variablenauflösung im Log
+                                msg = memory.get(val, val)
+                                print(f"[log] {msg}")
+                            elif typ == "notify":
+                                print(f"[notify] {val.upper()} 🔔")
+                            elif typ == "set":
+                                memory[act["key"]] = act["value"]
+                                print(f"[set] {act['key']} = {act['value']}")
+                    time.sleep(interval)
+            return task
 
-                    elif typ == "save":
-                        with open("output.log", "a", encoding="utf-8") as f:
-                            f.write(f"[saved] {val}\n")
-                        print(f"[save] Written to output.log")
+        # Thread starten
+        threading.Thread(target=make_task(interval, condition, actions), daemon=True).start()
 
-                    elif typ == "exec":
-                        try:
-                            print("[exec] →", end=" ")
-                            exec(val)
-                        except Exception as e:
-                            print(f"[exec error] {e}")
+    # Main-Thread aktiv halten
+    while True:
+        time.sleep(1)
 
-        print(f"[start] Running every {interval}s...")
-        task()
-        while True:
-            time.sleep(interval)
-            task()
-
-# Main
+# Main-Startpunkt
 if __name__ == "__main__":
     with open("examples/hello.chrono") as f:
         code = f.read()

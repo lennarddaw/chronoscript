@@ -34,17 +34,22 @@ def _resolve_condition(expr: str) -> bool:
 
     return False  # fallback
 
-def eval_condition(expr: str) -> bool:
+def eval_condition(expr: str, memory: dict = None) -> bool:
     try:
-        return eval(expr, {"__builtins__": {}}, {
+        local_vars = {
+            **{k: f'"{v}"' if isinstance(v, str) else v for k, v in (memory or {}).items()},
             "is_weekend": lambda: _resolve_condition("is_weekend"),
             "is_weekday": lambda: _resolve_condition("is_weekday"),
-            "hour_between": lambda x, y: _resolve_condition(f"hour_between({x},{y})"),
-            "random_chance": lambda p: _resolve_condition(f"random_chance({p})"),
+            "hour_between": lambda *args: _resolve_condition(f"hour_between({', '.join(map(str, args))})"),
             "date_is": lambda s: _resolve_condition(f'date_is("{s}")'),
+            "random_chance": lambda p: _resolve_condition(f"random_chance({p})"),
             "true": True,
             "false": False
-        })
+        }
+        return eval(expr, {"__builtins__": {}}, local_vars)
     except Exception as e:
         print(f"[eval error] {e}")
         return False
+
+
+

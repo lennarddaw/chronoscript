@@ -1,0 +1,10 @@
+set mood = "tired";
+
+loop every 5s if mood == "tired" {
+    log("Take a break");
+    set mood = "relaxed";
+}
+
+loop every 5s if mood == "relaxed" {
+    notify("You seem better now!");
+}

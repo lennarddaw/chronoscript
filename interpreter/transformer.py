@@ -1,5 +1,6 @@
 from lark import Transformer, Tree, Token
 
+
 class ChronoTransformer(Transformer):
     def TIME(self, token):
         value = int(token[:-1])
@@ -39,21 +40,40 @@ class ChronoTransformer(Transformer):
 
     def not_expr(self, items):
         return f"not ({items[0]})"
+    
+    def call(self, items):
+        name = str(items[0])
+        val = str(items[1]) if len(items) > 1 else ""
+        return {"type": name, "value": val}
+    
+    def set(self, items):
+        key = str(items[0])
+        val = str(items[1])
+        if val.startswith('"') and val.endswith('"'):
+            val = val[1:-1]
+        return {"type": "set", "key": key, "value": val}
 
 
     def string(self, items):
         return str(items[0])[1:-1]  # Strip quotes
+    
+    def raw_condition(self, items):
+        return str(items[0]).strip()
+    
+    def assign_stmt(self, items):
+        return {"type": "set", "key": str(items[0]), "value": str(items[1])}
 
     def action(self, items):
         name = str(items[0])
         value = items[1] if len(items) > 1 else ""
         return {"type": name, "value": value}
-
+    
     def statement(self, items):
         return {
-            "interval": items[0],
-            "condition": items[1],
-            "actions": items[2:]
+        "type": "loop",
+        "interval": items[0],
+        "condition": items[1],
+        "actions": items[2:]
         }
 
     def start(self, items):
