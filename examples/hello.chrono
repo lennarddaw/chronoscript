@@ -1,0 +1,3 @@
+loop every 10s if true {
+    log("Hello from Chronoscript");
+}
