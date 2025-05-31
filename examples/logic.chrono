@@ -1,0 +1,7 @@
+loop every 10s if is_weekday() && hour_between(9, 17) {
+    log("We're in productive hours");
+}
+
+loop every 15s if !is_weekend() || random_chance(0.1) {
+    notify("Either not weekend or lucky event!");
+}

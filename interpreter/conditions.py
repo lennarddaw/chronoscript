@@ -1,20 +1,14 @@
 from datetime import datetime
 import random
 
-def eval_condition(expr: str) -> bool:
+def _resolve_condition(expr: str) -> bool:
     now = datetime.now()
 
-    # Fixe Bedingungen
-    if expr == "true":
-        return True
-    if expr == "false":
-        return False
-    if expr.startswith("is_weekend"):
+    if expr == "is_weekend":
         return now.weekday() >= 5
-    if expr.startswith("is_weekday"):
+    if expr == "is_weekday":
         return now.weekday() < 5
 
-    # hour_between(x, y)
     if expr.startswith("hour_between("):
         try:
             args = expr[13:-1].split(",")
@@ -24,20 +18,33 @@ def eval_condition(expr: str) -> bool:
         except:
             return False
 
-    # date_is("YYYY-MM-DD")
+    if expr.startswith("random_chance("):
+        try:
+            p = float(expr[15:-1])
+            return random.random() < p
+        except:
+            return False
+
     if expr.startswith("date_is("):
         try:
-            date_str = expr[9:-2]
+            date_str = expr[9:-1].strip().strip('"')
             return now.strftime("%Y-%m-%d") == date_str
         except:
             return False
 
-    # random_chance(0.2)
-    if expr.startswith("random_chance("):
-        try:
-            prob = float(expr[15:-1])
-            return random.random() < prob
-        except:
-            return False
+    return False  # fallback
 
-    return False  # Default: unknown condition
+def eval_condition(expr: str) -> bool:
+    try:
+        return eval(expr, {"__builtins__": {}}, {
+            "is_weekend": lambda: _resolve_condition("is_weekend"),
+            "is_weekday": lambda: _resolve_condition("is_weekday"),
+            "hour_between": lambda x, y: _resolve_condition(f"hour_between({x},{y})"),
+            "random_chance": lambda p: _resolve_condition(f"random_chance({p})"),
+            "date_is": lambda s: _resolve_condition(f'date_is("{s}")'),
+            "true": True,
+            "false": False
+        })
+    except Exception as e:
+        print(f"[eval error] {e}")
+        return False
