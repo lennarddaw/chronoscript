@@ -19,11 +19,14 @@ simple_cond: CNAME
 func_call: CNAME "(" [condition_args] ")"
 condition_args: condition_arg ("," condition_arg)*
 condition_arg: ESCAPED_STRING | NUMBER | CNAME
-?action: call_action
-       | set_action
+call_action: CNAME "(" string? ")" ";"                -> call
+set_action: "set" CNAME "=" value ";"                 -> set
+wait_action: "wait" "(" TIME ")" ";"                  -> wait
 
-call_action: CNAME "(" string? ")" ";"                  -> call
-set_action: "set" CNAME "=" value ";"                   -> set
+action: call_action
+      | set_action
+      | wait_action
+
 ?value: ESCAPED_STRING | NUMBER | CNAME
 
 assign_stmt: "set" CNAME "=" value ";"

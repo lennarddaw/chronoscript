@@ -52,7 +52,9 @@ class ChronoTransformer(Transformer):
         if val.startswith('"') and val.endswith('"'):
             val = val[1:-1]
         return {"type": "set", "key": key, "value": val}
-
+    
+    def wait(self, items):
+        return {"type": "wait", "value": items[0]}
 
     def string(self, items):
         return str(items[0])[1:-1]  # Strip quotes

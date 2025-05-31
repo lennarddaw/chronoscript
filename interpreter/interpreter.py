@@ -51,6 +51,12 @@ def run_script(parsed_script):
                             elif typ == "set":
                                 memory[act["key"]] = act["value"]
                                 print(f"[set] {act['key']} = {act['value']}")
+                            elif typ == "wait":
+                             try:
+                                time.sleep(val)
+                             except Exception as e:
+                                print(f"[wait error] {e}")
+
                     time.sleep(interval)
             return task
 

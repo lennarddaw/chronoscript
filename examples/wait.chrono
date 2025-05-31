@@ -1,0 +1,5 @@
+loop every 10s if true {
+    log("Start...");
+    wait(3s);
+    log("Waited 3 seconds!");
+}
