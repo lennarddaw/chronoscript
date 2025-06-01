@@ -1,42 +1,40 @@
-// Initialzustand setzen
+
 set status = "booting";
 set mood = "neutral";
 
-// Hauptloop: jede Minute prüfen, was los ist
-loop every 60s if true {
+
+loop every 5s if true {
     log("Heartbeat: System running...");
-    exec("print('Status:', status)");       // statt notify( ... + status )
+    exec("print('Status:', status)");
     wait(2s);
     exec("print('>>> Python eval: status =', status)");
 }
 
-// Zustand ändern je nach Zeit
-loop every 10s if hour_between(6, 9) {
+loop every 5s if hour_between(6, 9) && mood != "sleepy" {
     set mood = "sleepy";
     log("Good morning. Mood is sleepy.");
 }
 
-loop every 10s if hour_between(10, 17) {
+loop every 5s if hour_between(10, 17) && mood != "productive" {
     set mood = "productive";
     log("Work hours detected. Mood is productive.");
 }
 
-loop every 10s if hour_between(18, 22) {
+loop every 5s if hour_between(18, 22) && mood != "relaxed" {
     set mood = "relaxed";
     log("Evening. Mood is relaxed.");
 }
 
-// Dynamische Reaktion auf Stimmung
-loop every 15s if mood == "relaxed" {
-    notify("Time to unwind ✨");
+loop every 5s if mood == "relaxed" {
+    notify("Time to unwind");
 }
 
-loop every 15s if mood == "productive" {
+loop every 5s if mood == "productive" {
     log("Stay focused!");
     wait(1s);
     log("Keep up the good work.");
 }
 
-loop every 30s if random_chance(0.2) {
-    notify("💡 Inspiration moment triggered!");
+loop every 5s if random_chance(0.2) {
+    notify("Inspiration moment triggered!");
 }

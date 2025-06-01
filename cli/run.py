@@ -17,7 +17,7 @@ def main():
         print(f"[error] File not found: {args.file}")
         sys.exit(1)
 
-    with open(args.file, "r") as f:
+    with open(args.file, "r", encoding="utf-8") as f:
         code = f.read()
 
     try:
