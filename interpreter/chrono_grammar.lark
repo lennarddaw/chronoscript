@@ -1,4 +1,4 @@
-start: (statement | assign_stmt)+
+start: (statement | set_action)+
 
 statement: "loop" "every" TIME "if" condition "{" action+ "}"
 
@@ -19,9 +19,10 @@ simple_cond: CNAME
 func_call: CNAME "(" [condition_args] ")"
 condition_args: condition_arg ("," condition_arg)*
 condition_arg: ESCAPED_STRING | NUMBER | CNAME
-call_action: CNAME "(" string? ")" ";"                -> call
-set_action: "set" CNAME "=" value ";"                 -> set
-wait_action: "wait" "(" TIME ")" ";"                  -> wait
+
+call_action: CNAME "(" ESCAPED_STRING? ")" ";"      -> call
+set_action: "set" CNAME "=" value ";"               -> set
+wait_action: "wait" "(" TIME ")" ";"                -> wait
 
 action: call_action
       | set_action
@@ -29,9 +30,8 @@ action: call_action
 
 ?value: ESCAPED_STRING | NUMBER | CNAME
 
-assign_stmt: "set" CNAME "=" value ";"
-
-string: ESCAPED_STRING
+COMMENT: /\/\/[^\n]*/
+%ignore COMMENT
 
 TIME: /\d+[smhd]/
 

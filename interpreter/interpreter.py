@@ -32,7 +32,6 @@ def run_script(parsed_script):
 
         print(f"[debug] Parsed loop: every {interval}s if {condition} → {actions}")
 
-        # Task-Logik mit eval_condition und Speicher
         def make_task(interval, condition, actions):
             def task():
                 print(f"[start] Running every {interval}s...")
@@ -43,33 +42,41 @@ def run_script(parsed_script):
                             val = act.get("value", "")
 
                             if typ == "log":
-                                # Dynamische Variablenauflösung im Log
-                                msg = memory.get(val, val)
+                                msg = val.strip('"')
                                 print(f"[log] {msg}")
+
                             elif typ == "notify":
-                                print(f"[notify] {val.upper()} 🔔")
+                                msg = val.strip('"')
+                                print(f"[notify] {msg.upper()} 🔔")
+
                             elif typ == "set":
                                 memory[act["key"]] = act["value"]
                                 print(f"[set] {act['key']} = {act['value']}")
+
                             elif typ == "wait":
-                             try:
-                                time.sleep(val)
-                             except Exception as e:
-                                print(f"[wait error] {e}")
+                                time.sleep(act["value"])
+
+                            elif typ == "exec":
+                                # val enthält den Python-Code als String, z. B. '"print(...)"'
+                                code_str = val.strip('"')
+                                try:
+                                    # Führe code_str im Kontext von memory aus
+                                    exec(code_str, {}, memory)
+                                except Exception as e:
+                                    print(f"[exec error] {e}")
 
                     time.sleep(interval)
             return task
 
-        # Thread starten
         threading.Thread(target=make_task(interval, condition, actions), daemon=True).start()
 
-    # Main-Thread aktiv halten
+    # Main-Thread am Leben halten
     while True:
         time.sleep(1)
 
 # Main-Startpunkt
 if __name__ == "__main__":
-    with open("examples/hello.chrono") as f:
+    with open("examples/showcase.chrono") as f:
         code = f.read()
     tree = parser.parse(code)
     data = ChronoTransformer().transform(tree)
