@@ -1,0 +1,80 @@
+// -------------------------------
+// 1. Startregel
+// -------------------------------
+start: (statement | set_action)+
+
+// -------------------------------
+// 2. Statement: Loop und Funktionsdefinition (optional)
+// -------------------------------
+statement: "loop" "every" TIME "if" expr "{" action+ "}"
+         | fn_def
+
+// -------------------------------
+// 3. Funktionsdefinition (V1 optional)
+// -------------------------------
+fn_def: "fn" CNAME "(" [param_list] ")" "{" statement* "}"
+param_list: CNAME ("," CNAME)*
+
+// -------------------------------
+// 4. Ausdrücke (Expressions)
+// -------------------------------
+// Wir ersetzen raw_condition durch eine vollständige Expression-Regel:
+?expr: expr "||" expr       -> or_expr
+     | expr "&&" expr       -> and_expr
+     | "!" expr             -> not_expr
+     | comparison
+
+?comparison: arithmetic (("==" | "!=" | "<" | ">" | "<=" | ">=") arithmetic)?
+
+?arithmetic: arithmetic "+" term   -> add
+           | arithmetic "-" term   -> sub
+           | term
+
+?term: term "*" factor   -> mul
+     | term "/" factor   -> div
+     | term "%" factor   -> mod
+     | factor
+
+?factor: "-" factor      -> neg
+       | atom
+
+?atom: NUMBER                            -> number
+     | ESCAPED_STRING                    -> string
+     | "true"                            -> true
+     | "false"                           -> false
+     | CNAME "(" [arg_list] ")"          -> func_call
+     | CNAME                             -> var
+     | "(" expr ")"
+
+arg_list: expr ("," expr)*
+
+// -------------------------------
+// 5. Aktionen (Action-Statements)
+// -------------------------------
+call_action: CNAME "(" [string_or_expr] ")" ";"     -> call
+set_action: "set" CNAME "=" expr ";"               -> set
+wait_action: "wait" "(" TIME ")" ";"                -> wait
+dump_action: "dump_memory" "(" ")" ";"              -> dump
+
+action: call_action
+      | set_action
+      | wait_action
+      | dump_action
+
+// -------------------------------
+// 6. Literale und Tokens
+// -------------------------------
+// Ein String ist ein ESCAPED_STRING; wir strippen im Transformer später die Quotes.
+string_or_expr: ESCAPED_STRING
+              | expr
+
+TIME: /\d+[smhd]/
+
+// Für Nummern (ganzzahlig)
+%import common.NUMBER
+%import common.ESCAPED_STRING
+%import common.CNAME
+%import common.WS
+COMMENT: /\/\/[^\n]*/
+%ignore COMMENT
+%ignore WS

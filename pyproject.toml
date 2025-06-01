@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chronoscript"
+version = "0.1.0"
+description = "Chronoscript – eine kleine DSL für zeit- und zustandsgesteuerte Automatisierung"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+  { name = "Dein Name", email = "deine.email@example.com" }
+]
+keywords = ["dsl", "automation", "cron", "python"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
+
+dependencies = [
+  "lark-parser>=0.7.0"
+]
+
+# Hier geben wir URLs (Homepage, Repository usw.) in project.urls an
+[project.urls]
+"Repository" = "https://github.com/dein-user/chronoscript"
+"Documentation" = "https://github.com/dein-user/chronoscript#readme"
+
+[project.scripts]
+chrono = "chronoscript.cli.run:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

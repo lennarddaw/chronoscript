@@ -1,0 +1,2 @@
+[console_scripts]
+chrono = chronoscript.cli.run:main

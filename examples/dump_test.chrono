@@ -1,0 +1,9 @@
+set user = "alice";
+set count = 0;
+
+loop every 10s if true {
+    dump_memory();
+    exec("count = count + 1");
+    exec("print('Incremented count to', count)");
+    wait(2s);
+}

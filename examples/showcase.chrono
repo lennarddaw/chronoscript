@@ -38,3 +38,9 @@ loop every 5s if mood == "productive" {
 loop every 5s if random_chance(0.2) {
     notify("Inspiration moment triggered!");
 }
+
+
+loop every 30s if true {
+    dump_memory();
+    wait(5s);
+}
